@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+
+{% block title %}Produtos | Estoque Local{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h1>Produtos</h1>
+
+    <a class="btn btn-primary" href="{{ url_for('product_form') }}">
+        Novo produto
+    </a>
+
+</div>
+
+<!-- Pesquisa de produtos -->
+<form method="get" class="row g-2 mb-3">
+
+    <div class="col-md-6">
+        <input
+            class="form-control"
+            type="text"
+            name="q"
+            value="{{ request.args.get('q', '') }}"
+            placeholder="Pesquisar por nome ou código"
+        >
+    </div>
+
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">
+            Pesquisar
+        </button>
+    </div>
+
+</form>
+
+<!-- Tabela de produtos -->
+<div class="table-responsive">
+
+    <table class="table table-hover">
+
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Produto</th>
+                <th>Estoque</th>
+                <th>Mínimo</th>
+                <th>Fornecedor</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for p in products %}
+
+                <tr>
+
+                    <td>{{ p.code }}</td>
+
+                    <td>{{ p.name }}</td>
+
+                    <td class="{% if p.quantity <= p.minimum %}text-danger fw-bold{% endif %}">
+                        {{ p.quantity }} {{ p.unit }}
+                    </td>
+
+                    <td>{{ p.minimum }}</td>
+
+                    <td>
+                        {{ p.supplier.name if p.supplier else '-' }}
+                    </td>
+
+                    <td class="text-end">
+
+                        <a
+                            class="btn btn-sm btn-outline-primary"
+                            href="{{ url_for('product_form', pid=p.id) }}"
+                        >
+                            Editar
+                        </a>
+
+                        {% if session.get('role') == 'admin' %}
+
+                            <form
+                                class="d-inline"
+                                method="post"
+                                action="{{ url_for('product_delete', pid=p.id) }}"
+                                onsubmit="return confirm('Excluir este produto?')"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Excluir
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+                    <td colspan="6" class="text-center">
+                        Nenhum produto cadastrado.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

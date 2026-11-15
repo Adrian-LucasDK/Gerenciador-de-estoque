@@ -1,0 +1,160 @@
+
+{% extends "base.html" %}
+
+{% block title %}Relatórios | Estoque Local{% endblock %}
+
+{% block content %}
+
+<h1>Relatórios e resumo financeiro</h1>
+
+<!-- Filtros e exportação -->
+<form method="get" class="row g-2 mb-3">
+
+    <div class="col-auto">
+        <label class="form-label">Data inicial</label>
+
+        <input
+            class="form-control"
+            type="date"
+            name="inicio"
+            value="{{ start }}"
+        >
+    </div>
+
+    <div class="col-auto">
+        <label class="form-label">Data final</label>
+
+        <input
+            class="form-control"
+            type="date"
+            name="fim"
+            value="{{ end }}"
+        >
+    </div>
+
+    <div class="col-auto align-self-end">
+
+        <button type="submit" class="btn btn-primary">
+            Filtrar
+        </button>
+
+        <a class="btn btn-outline-secondary" href="{{ url_for('reports') }}">
+            Limpar
+        </a>
+
+        <a
+            class="btn btn-success"
+            href="{{ url_for('export_excel', inicio=start, fim=end) }}"
+        >
+            Exportar Excel
+        </a>
+
+    </div>
+
+</form>
+
+<!-- Resumo financeiro -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Valor estimado em entradas</span>
+
+            <strong class="text-success">
+                R$ {{ '%.2f'|format(total_entradas) }}
+            </strong>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Valor estimado em saídas</span>
+
+            <strong class="text-danger">
+                R$ {{ '%.2f'|format(total_saidas) }}
+            </strong>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Diferença entradas - saídas</span>
+
+            <strong>
+                R$ {{ '%.2f'|format(total_entradas - total_saidas) }}
+            </strong>
+        </div>
+    </div>
+
+</div>
+
+<p class="text-muted small">
+    Estimativa baseada no custo unitário cadastrado.
+    Não representa faturamento, lucro ou apuração contábil.
+</p>
+
+<!-- Tabela de movimentações -->
+<div class="table-responsive">
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Qtd.</th>
+                <th>Custo un.</th>
+                <th>Valor estimado</th>
+                <th>Usuário</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for m in rows %}
+
+                <tr>
+
+                    <td>
+                        {{ m.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+
+                    <td>{{ m.product.name }}</td>
+
+                    <td>{{ m.product.code }}</td>
+
+                    <td>{{ m.kind }}</td>
+
+                    <td>{{ m.quantity }}</td>
+
+                    <td>
+                        R$ {{ '%.2f'|format(m.product.cost) }}
+                    </td>
+
+                    <td>
+                        R$ {{ '%.2f'|format(m.quantity * m.product.cost) }}
+                    </td>
+
+                    <td>{{ m.user.username }}</td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+                    <td colspan="8" class="text-center">
+                        Nenhum registro no período.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

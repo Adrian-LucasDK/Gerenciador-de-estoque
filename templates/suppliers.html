@@ -1,0 +1,144 @@
+
+{% extends "base.html" %}
+
+{% block title %}Fornecedores | Estoque Local{% endblock %}
+
+{% block content %}
+
+<h1>Fornecedores</h1>
+
+<!-- Formulário de cadastro -->
+<form method="post" class="card card-body mb-4">
+
+    <h5>Novo fornecedor</h5>
+
+    <div class="row g-2">
+
+        <div class="col-md-4">
+            <input
+                class="form-control"
+                type="text"
+                name="name"
+                placeholder="Nome/Razão social"
+                required
+            >
+        </div>
+
+        <div class="col-md-2">
+            <input
+                class="form-control"
+                type="text"
+                name="document"
+                placeholder="CPF/CNPJ"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <input
+                class="form-control"
+                type="text"
+                name="phone"
+                placeholder="Telefone"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <input
+                class="form-control"
+                type="email"
+                name="email"
+                placeholder="E-mail"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <input
+                class="form-control"
+                type="text"
+                name="address"
+                placeholder="Endereço"
+            >
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3 align-self-start">
+        Cadastrar
+    </button>
+
+</form>
+
+<!-- Lista de fornecedores -->
+<div class="table-responsive">
+
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Fornecedor</th>
+                <th>Documento</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Endereço</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for s in suppliers %}
+
+                <tr>
+
+                    <td>{{ s.name }}</td>
+
+                    <td>{{ s.document or '-' }}</td>
+
+                    <td>{{ s.phone or '-' }}</td>
+
+                    <td>{{ s.email or '-' }}</td>
+
+                    <td>{{ s.address or '-' }}</td>
+
+                    <td class="text-end">
+
+                        {% if session.get('role') == 'admin' %}
+
+                            <form
+                                method="post"
+                                action="{{ url_for('supplier_delete', sid=s.id) }}"
+                                onsubmit="return confirm('Excluir fornecedor?')"
+                            >
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                >
+                                    Excluir
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+            {% else %}
+
+                <tr>
+                    <td colspan="6" class="text-center">
+                        Nenhum fornecedor cadastrado.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

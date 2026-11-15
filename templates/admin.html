@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Administração</h1>
+
+<p class="text-muted">
+    Backup automático a cada 24 horas enquanto o servidor estiver ligado.
+    São mantidas as 30 cópias mais recentes.
+</p>
+
+<div class="card card-body mb-4">
+    <h4>Backup do banco de dados</h4>
+
+    <form method="post" action="{{ url_for('backup_now') }}">
+        <button type="submit" class="btn btn-primary">
+            Gerar backup agora
+        </button>
+    </form>
+</div>
+
+<h4>Backups recentes</h4>
+
+<div class="list-group">
+    {% for file in backups %}
+        <div class="list-group-item">
+            {{ file }}
+        </div>
+    {% else %}
+        <div class="list-group-item">
+            Nenhum backup gerado ainda.
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

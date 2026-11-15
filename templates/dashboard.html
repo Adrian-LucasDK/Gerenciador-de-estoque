@@ -1,0 +1,211 @@
+
+{% extends "base.html" %}
+
+{% block title %}Painel | Estoque Local{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>Painel do estoque</h1>
+        <p class="text-muted mb-0">
+            Resumo geral dos produtos e movimentações.
+        </p>
+    </div>
+
+    <a class="btn btn-primary" href="{{ url_for('movements') }}">
+        Registrar movimentação
+    </a>
+</div>
+
+<!-- Indicadores do estoque -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Produtos cadastrados</span>
+            <strong>{{ products|length }}</strong>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Itens com estoque baixo</span>
+            <strong class="text-danger">{{ low|length }}</strong>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat">
+            <span>Movimentações recentes</span>
+            <strong>{{ recent|length }}</strong>
+        </div>
+    </div>
+
+</div>
+
+<!-- Gráficos -->
+<div class="row g-3 my-3">
+
+    <div class="col-lg-6">
+        <div class="card card-body">
+            <h5>Produtos por nível de estoque</h5>
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card card-body">
+            <h5>Quantidade em estoque (10 primeiros)</h5>
+            <canvas id="quantityChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alertas de estoque baixo -->
+<h4>Alertas de estoque baixo</h4>
+
+{% if low %}
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Código</th>
+                    <th>Quantidade</th>
+                    <th>Mínimo</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for p in low %}
+                    <tr>
+                        <td>{{ p.name }}</td>
+                        <td>{{ p.code }}</td>
+                        <td class="text-danger fw-bold">
+                            {{ p.quantity }} {{ p.unit }}
+                        </td>
+                        <td>{{ p.minimum }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+{% else %}
+
+    <p class="text-success">
+        Nenhum produto abaixo do mínimo.
+    </p>
+
+{% endif %}
+
+<!-- Últimas movimentações -->
+<h4 class="mt-4">Últimas movimentações</h4>
+
+<div class="table-responsive">
+    <table class="table">
+
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th>Quantidade</th>
+                <th>Usuário</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for m in recent %}
+                <tr>
+                    <td>
+                        {{ m.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+                    <td>{{ m.product.name }}</td>
+                    <td>{{ m.kind }}</td>
+                    <td>{{ m.quantity }}</td>
+                    <td>{{ m.user.username }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">
+                        Nenhuma movimentação registrada.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Dados recebidos do Flask
+    const labels = {{ products|map(attribute='name')|list|tojson }};
+    const quantities = {{ products|map(attribute='quantity')|list|tojson }};
+    const minimums = {{ products|map(attribute='minimum')|list|tojson }};
+
+    const lowCount = {{ low|length }};
+
+    // Gráfico de produtos por nível de estoque
+    new Chart(document.getElementById('stockChart'), {
+        type: 'doughnut',
+
+        data: {
+            labels: ['Estoque baixo', 'Estoque adequado'],
+
+            datasets: [{
+                data: [
+                    lowCount,
+                    Math.max(0, labels.length - lowCount)
+                ]
+            }]
+        },
+
+        options: {
+            responsive: true
+        }
+    });
+
+    // Gráfico de quantidade em estoque
+    new Chart(document.getElementById('quantityChart'), {
+        type: 'bar',
+
+        data: {
+            labels: labels.slice(0, 10),
+
+            datasets: [
+                {
+                    label: 'Quantidade',
+                    data: quantities.slice(0, 10)
+                },
+                {
+                    label: 'Estoque mínimo',
+                    data: minimums.slice(0, 10)
+                }
+            ]
+        },
+
+        options: {
+            responsive: true,
+
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

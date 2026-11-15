@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+
+{% block title %}Acesso negado | Estoque Local{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-danger">
+    <h2>Acesso negado</h2>
+
+    {{ message }}
+</div>
+
+<a class="btn btn-primary" href="{{ url_for('dashboard') }}">
+    Voltar ao painel
+</a>
+
+{% endblock %}

@@ -1,0 +1,115 @@
+
+{% extends "base.html" %}
+
+{% block title %}Movimentações | Estoque Local{% endblock %}
+
+{% block content %}
+
+<h1>Entrada e saída</h1>
+
+<!-- Formulário de movimentação -->
+<form method="post" class="card card-body mb-4">
+
+    <div class="row g-3">
+
+        <div class="col-md-5">
+            <label class="form-label">Produto</label>
+
+            <select class="form-select" name="product_id" required>
+                {% for p in products %}
+                    <option value="{{ p.id }}">
+                        {{ p.code }} — {{ p.name }} (saldo: {{ p.quantity }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Tipo</label>
+
+            <select class="form-select" name="kind" required>
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Quantidade</label>
+
+            <input
+                class="form-control"
+                type="number"
+                name="quantity"
+                min="1"
+                step="1"
+                required
+            >
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Observação</label>
+
+            <input
+                class="form-control"
+                type="text"
+                name="note"
+                placeholder="Opcional"
+            >
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3 align-self-start">
+        Registrar
+    </button>
+
+</form>
+
+<!-- Histórico de movimentações -->
+<h4>Histórico recente</h4>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th>Qtd.</th>
+                <th>Usuário</th>
+                <th>Observação</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for m in history %}
+                <tr>
+                    <td>
+                        {{ m.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+
+                    <td>{{ m.product.name }}</td>
+
+                    <td>{{ m.kind }}</td>
+
+                    <td>{{ m.quantity }}</td>
+
+                    <td>{{ m.user.username }}</td>
+
+                    <td>{{ m.note or '-' }}</td>
+                </tr>
+
+            {% else %}
+                <tr>
+                    <td colspan="6">
+                        Sem movimentações.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{% endblock %}
